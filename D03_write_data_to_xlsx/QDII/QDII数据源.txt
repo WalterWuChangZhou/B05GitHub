@@ -2,7 +2,7 @@
 1)写入 XOP 净值
 ====================================
 源文件E:\B01Python\PythonProject\A06_xop\xop_daily_nav.csv
-目标文件 E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsm   
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm   
 要求:
 把源文件中的表头为nav的数据，匹配日期，写入目标文件中 162411页面中的 XOP_NAV 列
 
@@ -10,7 +10,7 @@
 2）写入xop 价格
 ====================================================
 源文件   E:\B01Python\PythonProject\A06_xop\xop_gld_history.csv
-目标文件 E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsm
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm  
 要求:
 根据源文件的表头中XOP列匹配相应日期的数据写入 目标文件中 162411页面下的的XOP_price列
 
@@ -18,7 +18,7 @@
 3）写入LOF基金的NAV
 =======================================
 源文件  E:\B01Python\PythonProject\A01_fund_nav_data\fund_nav_data 目录下，以基金代码为文件名的csv文件
-目标文件 E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsm
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm  
 要求：
 根据目标文件的工作表名称，匹配源文件目录下对应基金代码文件中的nav列数据，匹配日期，写入目标文件表头为nav列
 
@@ -26,7 +26,7 @@
 4）写入 lof基金的收盘价和成交量
 ========================================
 源文件： E:\B01Python\PythonProject\A02_index_and_fund_close_data\index_data
-目标文件：E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsm
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm  
 要求：
 根据源文件目录下，以基金代码_指数代码为文件名的csv文件，
 把对应文件中，以fund_close列的数据写入 目标文件中，以基金代码为页面中的nav列
@@ -36,7 +36,7 @@
 5） 写入 lof 基金 场内份额 share
 ==================================
 源文件：E:\B01Python\PythonProject\A03_fund_share_data\fund_share_data
-目标文件 E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsm
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm  
 要求：
 根据源文件目录下的以lof基金代码为名称的csv文件中的share列的数据，写入目标文件中匹配基金代码的页面下的share列
 
@@ -44,7 +44,7 @@
 6）写入外汇数据
 =================================
 源文件：E:\B01Python\PythonProject\A05_fx_rate\fx_rate\fx_rate.csv
-目标文件：E:\08-STOCK\DAAEON\【03-华泰证券★】\LOF基金套利\【★B00-套利记录】\2026年QDII LOF基金估值偏差记录.xlsx
+目标文件 E:\2026年QDII LOF基金估值偏差记录.xlsm  
 要求：根据源文件表头，写入目标文件，每一个页面中对应表头的列，匹配日期写入相应数据
 
 ==================================
