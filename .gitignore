@@ -7,6 +7,8 @@ env/
 ENV/
 env.bak/
 venv.bak/
+.idea/
+.gitignore
 
 # Python缓存文件
 __pycache__/
@@ -85,6 +87,7 @@ coverage.xml
 # 忽略所有Excel数据文件（包含敏感套利数据）
 
 QDII数据源.txt
+cmd编码切换.txt
 
 *.xlsx
 *.xlsm
