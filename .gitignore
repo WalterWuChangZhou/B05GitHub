@@ -1,0 +1,107 @@
+gitignore
+
+# Python虚拟环境
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python缓存文件
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 编译文件
+*.pyc
+*.pyo
+*.pyd
+
+# 日志文件
+*.log
+
+# IDE配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+Thumbs.db
+.DS_Store
+
+# Excel临时文件
+~$*.xlsx
+~$*.xlsm
+~$*.xls
+
+# 数据文件（如果包含敏感数据）
+*.csv
+*.xlsx
+*.xlsm
+*.xls
+!example.csv  # 如果想保留示例文件
+
+# 配置文件（包含敏感信息）
+*.ini
+*.cfg
+*.conf
+.env
+
+# 备份文件
+*_backup.xlsm
+*_backup.xlsx
+*.bak
+
+# 你的具体项目文件
+D03_write_data_to_xlsx/QDII/__pycache__/
+D03_write_data_to_xlsx/__pycache__/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+*.ipynb
+
+# 测试和覆盖率报告
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# 忽略所有的批处理文件
+.bat
+
+# 实际项目需求
+# 忽略所有Excel数据文件（包含敏感套利数据）
+
+QDII数据源.txt
+
+*.xlsx
+*.xlsm
+*.xls
+!*.xlsx  # 如果想保留模板文件
+
+# 忽略CSV数据文件
+*.csv
+!example.csv
+
+# 忽略备份文件
+*_backup.xlsm
+*_backup.xlsx
+
+# 忽略虚拟环境
+.venv/
+
+# 忽略Python缓存
+__pycache__/
+*.pyc
