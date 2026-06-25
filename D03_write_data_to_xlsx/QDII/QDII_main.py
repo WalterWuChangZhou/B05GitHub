@@ -1,0 +1,14 @@
+from write_xop_price import update_xop_price
+from write_XOP_NAV import main
+from write_share_to_qdii_xlsx import process_fund_share_data
+from write_nav_to_qdII_xlsx import write_lof_fund_nav
+from write_forex import update_usd_cny_safe
+from write_close_amount_to_qdii_xlsx import process_fund_close_amount_data
+
+
+update_xop_price()
+main()
+process_fund_share_data()
+write_lof_fund_nav()
+update_usd_cny_safe()
+process_fund_close_amount_data()
