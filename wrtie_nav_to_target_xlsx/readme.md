@@ -1,0 +1,2 @@
+Requirement
+      Match the fund codes and dates from the "Subscription" and "Redemption" worksheets in the target Excel file against the NAV values in the corresponding CSV files (where each CSV file is named after its fund code) located in the source directory, and then update the target Excel file by writing the matched NAV values into the appropriate cells.
