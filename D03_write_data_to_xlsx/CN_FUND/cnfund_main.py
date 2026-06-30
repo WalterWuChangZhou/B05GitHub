@@ -14,8 +14,8 @@ class LOFDataUpdater:
         :param target_file: 目标Excel文件路径
         """
         self.target_file = target_file
-        # 修正备份文件路径
-        self.backup_file = r"E:\2026年LOF基金估值偏差记录_backup.xlsm"
+        # 更新备份文件路径
+        self.backup_file = r"E:\B01Python\PythonProject\to_github\D03_write_data_to_xlsx\CN_LOF基金估值偏差记录_backup.xlsm"
 
         # 数据源路径
         self.index_data_path = r"E:\B01Python\PythonProject\A02_index_and_fund_close_data\index_data"
@@ -27,6 +27,12 @@ class LOFDataUpdater:
         """备份目标文件"""
         try:
             if os.path.exists(self.target_file):
+                # 确保备份目录存在
+                backup_dir = os.path.dirname(self.backup_file)
+                if not os.path.exists(backup_dir):
+                    os.makedirs(backup_dir)
+                    print(f"创建备份目录：{backup_dir}")
+
                 # 如果备份文件已存在，先删除
                 if os.path.exists(self.backup_file):
                     try:
@@ -36,7 +42,8 @@ class LOFDataUpdater:
                         print(f"删除旧备份文件失败：{e}")
                         # 如果无法删除，使用带时间戳的新备份文件名
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                        self.backup_file = f"E:\\2026年LOF基金估值偏差记录_backup_{timestamp}.xlsm"
+                        backup_name = f"CN_LOF基金估值偏差记录_backup_{timestamp}.xlsm"
+                        self.backup_file = os.path.join(backup_dir, backup_name)
                         print(f"使用新备份文件名：{self.backup_file}")
 
                 shutil.copy2(self.target_file, self.backup_file)
@@ -166,8 +173,32 @@ class LOFDataUpdater:
                 if 'date' in df.columns:
                     df['date'] = pd.to_datetime(df['date']).dt.date
                     print(f"汇率数据日期范围：{df['date'].min()} 到 {df['date'].max()}")
+                elif 'Date' in df.columns:
+                    df['date'] = pd.to_datetime(df['Date']).dt.date
+                    print(f"汇率数据日期范围：{df['date'].min()} 到 {df['date'].max()}")
                 else:
                     print("汇率数据中没有日期列")
+                    print(f"可用的列名：{df.columns.tolist()}")
+                    return None
+
+                # 查找HKD/CNY相关的列
+                hkd_col = None
+                for col in df.columns:
+                    if 'hkd' in col.lower() and 'cny' in col.lower():
+                        hkd_col = col
+                        break
+                    elif 'hkd' in col.lower():
+                        hkd_col = col
+                        break
+
+                if hkd_col:
+                    print(f"找到HKD相关列：{hkd_col}")
+                    # 重命名为标准列名
+                    df['hkd/cny'] = df[hkd_col]
+                else:
+                    print("汇率数据中未找到HKD相关列")
+                    print(f"可用的列名：{df.columns.tolist()}")
+                    return None
 
                 return df
             except Exception as e:
@@ -239,7 +270,7 @@ class LOFDataUpdater:
                 date_val = date_val.date()
             data_date_dict[date_val] = row
 
-        # 遍历工作表的每一行数据（从第2行开始）
+        # 遍历工作表的每一行数据（从第2行开始，因为第1行是表头）
         updated_count = 0
         for row_idx in range(2, max_row + 1):
             date_cell = worksheet.cell(row=row_idx, column=date_col_idx)
@@ -278,6 +309,73 @@ class LOFDataUpdater:
 
         print(f"更新了 {updated_count} 行数据")
 
+    def update_add_share_column(self, worksheet):
+        """
+        计算并更新add_share列
+        add_share = (当前行share - 上一行share) / 10000
+        从第3行开始计算（第1行是表头，第2行是第一条数据）
+        """
+        # 获取表头
+        header_row = 1
+        header_dict = {}
+        for col in range(1, worksheet.max_column + 1):
+            cell_value = worksheet.cell(row=header_row, column=col).value
+            if cell_value:
+                header_dict[str(cell_value).lower()] = col
+
+        # 检查是否有share列和add_share列
+        if 'share' not in header_dict:
+            print("工作表中未找到share列，无法计算add_share")
+            return
+
+        if 'add_share' not in header_dict:
+            print("工作表中未找到add_share列，跳过计算")
+            return
+
+        share_col_idx = header_dict['share']
+        add_share_col_idx = header_dict['add_share']
+
+        print(f"找到share列（索引：{share_col_idx}）和add_share列（索引：{add_share_col_idx}）")
+
+        # 获取所有数据行的share值
+        share_values = []
+        row_indices = []
+
+        for row_idx in range(2, worksheet.max_row + 1):
+            share_cell = worksheet.cell(row=row_idx, column=share_col_idx)
+            if share_cell.value is not None and share_cell.value != '':
+                try:
+                    share_value = float(share_cell.value)
+                    share_values.append(share_value)
+                    row_indices.append(row_idx)
+                except (ValueError, TypeError):
+                    share_values.append(None)
+                    row_indices.append(row_idx)
+            else:
+                share_values.append(None)
+                row_indices.append(row_idx)
+
+        # 计算add_share（从第3行开始，即索引1开始）
+        updated_count = 0
+        for i in range(1, len(share_values)):  # 从第2条数据开始（索引1）
+            if share_values[i] is not None and share_values[i - 1] is not None:
+                try:
+                    # 计算差值并除以10000
+                    add_share_value = (share_values[i] - share_values[i - 1]) / 10000
+                    # 写入到对应的add_share列
+                    row_idx = row_indices[i]
+                    worksheet.cell(row=row_idx, column=add_share_col_idx, value=add_share_value)
+                    updated_count += 1
+
+                    # 打印前几条记录以便调试
+                    if updated_count <= 5:
+                        print(
+                            f"  计算add_share: 行{row_idx}, share: {share_values[i - 1]} -> {share_values[i]}, add_share: {add_share_value}")
+                except Exception as e:
+                    print(f"计算add_share失败（行{row_indices[i]}）：{e}")
+
+        print(f"更新了 {updated_count} 行add_share数据")
+
     def update_fx_rate_for_worksheet(self, worksheet, fx_df):
         """
         更新汇率数据到指定工作表（161124）
@@ -308,6 +406,9 @@ class LOFDataUpdater:
             if 'hkd' in col_name and 'cny' in col_name:
                 hkd_col_name = col_name
                 break
+            elif 'hkd' in col_name:
+                hkd_col_name = col_name
+                break
 
         if not hkd_col_name:
             print("工作表中未找到HKD/CNY列")
@@ -329,7 +430,10 @@ class LOFDataUpdater:
                 try:
                     date_val = datetime.strptime(date_val, '%Y-%m-%d').date()
                 except:
-                    continue
+                    try:
+                        date_val = datetime.strptime(date_val, '%Y/%m/%d').date()
+                    except:
+                        continue
 
             # 查找HKD/CNY列
             if 'hkd/cny' in row:
@@ -340,12 +444,19 @@ class LOFDataUpdater:
 
         print(f"汇率数据字典有 {len(fx_dict)} 条记录")
         if len(fx_dict) > 0:
-            sample_date = list(fx_dict.keys())[0]
-            sample_value = fx_dict[sample_date]
-            print(f"汇率数据示例：日期 {sample_date} -> HKD/CNY: {sample_value}")
+            # 打印前5条记录
+            count = 0
+            for date_val, value in fx_dict.items():
+                print(f"  汇率数据示例：日期 {date_val} -> HKD/CNY: {value}")
+                count += 1
+                if count >= 5:
+                    break
 
         # 更新数据
         updated_count = 0
+        matched_dates = []
+        unmatched_dates = []
+
         for row_idx in range(2, worksheet.max_row + 1):
             date_cell = worksheet.cell(row=row_idx, column=date_col_idx)
             if date_cell.value:
@@ -372,12 +483,24 @@ class LOFDataUpdater:
                         value = float(value)
                     worksheet.cell(row=row_idx, column=hkd_col_idx, value=value)
                     updated_count += 1
+                    matched_dates.append(current_date)
 
                     # 打印前几条更新记录以便调试
                     if updated_count <= 5:
-                        print(f"更新行 {row_idx}，日期 {current_date}，HKD/CNY: {value}")
+                        print(f"  更新行 {row_idx}，日期 {current_date}，HKD/CNY: {value}")
+                else:
+                    unmatched_dates.append(current_date)
 
         print(f"更新了 {updated_count} 行汇率数据")
+        print(f"匹配的日期数：{len(matched_dates)}")
+        if len(matched_dates) > 0:
+            print(f"匹配日期范围：{min(matched_dates)} 到 {max(matched_dates)}")
+        if len(unmatched_dates) > 0:
+            print(f"未匹配的日期数：{len(unmatched_dates)}")
+            if len(unmatched_dates) <= 10:
+                print(f"未匹配的日期示例：{unmatched_dates}")
+            else:
+                print(f"未匹配的日期示例（前10个）：{unmatched_dates[:10]}")
 
     def process_worksheet(self, worksheet_name, workbook):
         """
@@ -408,6 +531,8 @@ class LOFDataUpdater:
             fx_df = self.read_fx_rate_data()
             if fx_df is not None:
                 self.update_fx_rate_for_worksheet(worksheet, fx_df)
+            else:
+                print("汇率数据读取失败，跳过汇率更新")
             # 继续处理其他数据
 
         # 寻找对应的指数数据文件
@@ -455,6 +580,14 @@ class LOFDataUpdater:
             print("  更新份额数据")
             column_mapping = {'share': 'share'}
             self.update_worksheet_data(worksheet, share_df, column_mapping)
+
+            # 在更新完share数据后，计算add_share
+            print("  计算add_share数据")
+            self.update_add_share_column(worksheet)
+        else:
+            # 即使没有新的份额数据，也尝试计算add_share（基于现有的share数据）
+            print("  没有新的份额数据，但尝试基于现有数据计算add_share")
+            self.update_add_share_column(worksheet)
 
     def save_workbook_safely(self, workbook, file_path, max_attempts=5):
         """
@@ -529,7 +662,8 @@ class LOFDataUpdater:
             print(f"备份文件位置：{self.backup_file}")
         else:
             # 如果保存失败，尝试保存到临时文件
-            temp_file = f"E:\\temp_update_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsm"
+            temp_dir = os.path.dirname(self.target_file)
+            temp_file = os.path.join(temp_dir, f"temp_update_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsm")
             try:
                 workbook.save(temp_file)
                 print(f"已保存到临时文件：{temp_file}")
@@ -540,7 +674,7 @@ class LOFDataUpdater:
 
 def main():
     """主函数"""
-    target_file = r"E:\2026年LOF基金估值偏差记录.xlsm"
+    target_file = r"E:\B01Python\PythonProject\to_github\D03_write_data_to_xlsx\CN_LOF基金估值偏差记录.xlsm"
 
     updater = LOFDataUpdater(target_file)
     updater.run()
